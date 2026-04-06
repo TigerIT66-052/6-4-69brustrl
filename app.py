@@ -523,19 +523,26 @@ elif selected_tab == "🎪 ผลกระทบเหตุการณ์":
     ev_years = annual[annual[sel_event] == 1]["Year"].tolist()
 
     rows = []
-    for yr in ev_years:
-        curr = annual[annual["Year"] == yr]["Total_vis"].values
-        nxt_yr = yr + 1
-        nxt = annual[annual["Year"] == nxt_yr]["Total_vis"].values
-        pred_nxt = predict_2569(best_model, annual,
-                                {k: int(annual[annual["Year"] == nxt_yr][k].values[0])
-                                 for k in ["MotoGP", "Covid", "Marathon", "PhanomRung_Festival"]}
-                                ) if nxt_yr not in annual["Year"].values else None
-        rows.append({
-            "ปี": yr,
-            f"จำนวน (ปีที่มี {sel_event})": float(curr[0]) if len(curr) else None,
-            "จำนวนปีถัดไป (จริง)": float(nxt[0]) if len(nxt) else None,
-        })
+for yr in ev_years:
+    curr_row = annual[annual["Year"] == yr]
+    curr = curr_row["Total_vis"].values
+
+    nxt_yr = yr + 1
+    nxt_row = annual[annual["Year"] == nxt_yr]
+    nxt = nxt_row["Total_vis"].values
+
+    # 🔒 เช็คก่อนว่าปีถัดไปมีข้อมูลไหม
+    if not nxt_row.empty:
+        pred_nxt = None  # มีข้อมูลจริงแล้ว ไม่ต้อง predict
+    else:
+        pred_nxt = predict_2569(best_model, annual)
+
+    rows.append({
+        "ปี": yr,
+        f"จำนวน (ปีที่มี {sel_event})": float(curr[0]) if len(curr) else None,
+        "จำนวนปีถัดไป (จริง)": float(nxt[0]) if len(nxt) else None,
+        "จำนวนปีถัดไป (คาดการณ์)": float(pred_nxt) if pred_nxt else None
+    })
 
     df_ev = pd.DataFrame(rows).dropna()
     if not df_ev.empty:
