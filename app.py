@@ -523,7 +523,7 @@ elif selected_tab == "🎪 ผลกระทบเหตุการณ์":
     ev_years = annual[annual[sel_event] == 1]["Year"].tolist()
 
     rows = []
-for yr in ev_years:
+    for yr in ev_years:
     curr_row = annual[annual["Year"] == yr]
     curr = curr_row["Total_vis"].values
 
